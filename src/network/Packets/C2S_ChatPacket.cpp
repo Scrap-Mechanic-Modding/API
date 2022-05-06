@@ -1,4 +1,4 @@
-#include "../ByteStream.hpp"
+#include "../../utility/ByteStream.hpp"
 #include "../CompressionHelper.hpp"
 #include "C2S_ChatPacket.hpp"
 #include "Packet.hpp"

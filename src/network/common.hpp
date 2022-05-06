@@ -4,9 +4,9 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4996)
-#include "steam_api64/steam_api.h"
+#include "Steam/steam_api.h"
 #pragma warning(pop)
 
-#include "Utils.hpp"
+#include "../utility/Utils.hpp"
 
 #define UNUSED(x) (void) x

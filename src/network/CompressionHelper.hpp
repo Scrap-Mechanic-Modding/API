@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Utils.hpp"
-#include "lz4/lz4.h"
+#include "../utility/Utils.hpp"
+#include "LZ4/lz4.h"
 
 namespace SMM
 {

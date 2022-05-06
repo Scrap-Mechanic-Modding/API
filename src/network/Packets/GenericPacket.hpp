@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Packet.hpp"
+#include "../common.hpp"
 
 namespace SMM
 {

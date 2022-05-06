@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.hpp"
+#include "Utils.hpp"
 
 namespace SMM
 {
