@@ -1,23 +1,30 @@
-#include <winnt.h>
+#pragma once
 
-class ProgramHeader
+#define WIN32_LEAN_AND_MEAN
+
+#include <windows.h>
+#include <string>
+#include <unordered_map>
+
+namespace SMM
 {
-public:
-	void* m_base;
+    namespace Utility
+    {
 
-	uint16_t* m_dosMagic;
-	
-	//58 bytes
-	
-	uint32_t* m_peLoc;
+        class ProgramHeader
+        {
+        public:
+            IMAGE_DOS_HEADER* m_dosHeader;
+            //DOS Stub
+            IMAGE_NT_HEADERS64* m_ntHeaders;
+            IMAGE_SECTION_HEADER* m_sectionHeaders;
 
-	uint32_t* m_peSignature;
-	uint16_t* m_machine;
-	uint16_t* m_numSections;
-	uint32_t* m_timeStamp;
-	uint32_t* m_symbolTableOffset;
-	uint32_t* m_numOfSymbols;
-	uint16_t* m_sizeOfOptHeader;
-	uint16_t* m_char;
+            short m_numOfSections;
 
-};
+            std::unordered_map<std::string, IMAGE_SECTION_HEADER*> m_sections;
+
+            ProgramHeader(uintptr_t t_baseAddress);
+        };
+
+    } // namespace Utility
+} // namespace SMM

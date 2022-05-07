@@ -1,5 +1,6 @@
 #include "ByteStream.hpp"
 
+
 using namespace SMM::Network;
 
 ByteStream::ByteStream(char* t_buffer, size_t t_size) :

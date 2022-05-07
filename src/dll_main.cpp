@@ -5,7 +5,7 @@
 
 void WINAPI Main()
 {
-    auto baseAddress = reinterpret_cast<char*>(GetModuleHandle(NULL));
+    auto baseAddress = reinterpret_cast<uintptr_t>(GetModuleHandle(NULL));
     hookNetworkingFuncs(baseAddress);
 }
 

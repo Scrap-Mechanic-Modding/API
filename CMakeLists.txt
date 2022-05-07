@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20.0)
-project(SMT_DedicatedServer)
+project(SMM_API)
 
 if(MSVC)
   add_compile_options(/W4 /WX)
@@ -8,4 +8,4 @@ else()
 endif()
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/lib")
-add_subdirectory("${CMAKE_SOURCE_DIR}/src/PacketParser")
+add_subdirectory("${CMAKE_SOURCE_DIR}/src/")
