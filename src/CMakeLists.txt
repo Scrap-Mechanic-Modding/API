@@ -1,4 +1,5 @@
 add_library(API SHARED
+	common.hpp
 	utility/ByteStream.hpp
 	utility/ByteStream.cpp
 	utility/ProgramHeader.hpp
@@ -6,7 +7,10 @@ add_library(API SHARED
 	utility/Utils.hpp
 	utility/Utils.cpp
 	utility/VMT.hpp
-	network/common.hpp
+	utility/ProgramHeader.hpp
+	utility/ProgramHeader.cpp
+	utility/InstanceManager.hpp
+	utility/InstanceManager.cpp
 	network/Packets/Packet.hpp
 	network/Packets/GenericPacket.hpp
 	network/Packets/GenericPacket.cpp
@@ -18,7 +22,7 @@ add_library(API SHARED
 	network/PacketParser.cpp
 	network/hook.hpp
 	network/hook.cpp
-	network/dll_main.cpp
+	dll_main.cpp
 )
 
 target_link_libraries(API steam_api64)

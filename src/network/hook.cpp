@@ -1,10 +1,4 @@
-#include "common.hpp"
-#include "PacketParser.hpp"
-#include "../utility/Utils.hpp"
-#include "../utility/VMT.hpp"
 #include "hook.hpp"
-
-#include <memory>
 
 #define STEAM_NETSOCK_INTERFACE_FUNC_OFFSET 0xdb5c00
 
@@ -24,9 +18,9 @@ size_t hk_SendMessageToConnection(void* self, int h_conn, void* buff, size_t siz
     return o_SendMessageToConnection(self, h_conn, buff, size, flag, out_msg_num);
 }
 
-int hookNetworkingFuncs(char* baseAddress)
+int hookNetworkingFuncs(uintptr_t baseAddress)
 {
-    auto SteamNetSockInterface = static_cast<void****>(SteamInternal_ContextInit(baseAddress + STEAM_NETSOCK_INTERFACE_FUNC_OFFSET));
+    auto SteamNetSockInterface = static_cast<void****>(SteamInternal_ContextInit((void*) (baseAddress + STEAM_NETSOCK_INTERFACE_FUNC_OFFSET)));
 
     SteamNetSockInterfaceHook = std::make_unique<SMM::Utility::VMTHook>(*SteamNetSockInterface);
     SteamNetSockInterfaceHook->Hook(&hk_ReceiveMessagesOnPollGroup, 14);

@@ -7,6 +7,4 @@
 #include "Steam/steam_api.h"
 #pragma warning(pop)
 
-#include "../utility/Utils.hpp"
-
 #define UNUSED(x) (void) x
