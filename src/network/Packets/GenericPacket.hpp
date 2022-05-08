@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../../common.hpp"
 #include "Packet.hpp"
-#include "../common.hpp"
 
 namespace SMM
 {

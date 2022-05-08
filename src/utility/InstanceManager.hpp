@@ -29,10 +29,11 @@ namespace SMM
             }
 
         private:
-            std::unordered_map<std::string, void*> m_vtables;
+            std::unordered_map<std::string, void*> m_mapVftables;
+            std::unordered_map<std::string, void*> m_mapRTTILocators;
             std::unique_ptr<ProgramHeader> m_gameHeader;
 
-            char* FindStringInSection(const std::string& t_needle, const std::string& t_section);
+            const char* FindStringInSection(const std::string& t_needle, const std::string& t_section, const ptrdiff_t alignment = 4) const;
 
             InstanceManager()
             {
@@ -41,7 +42,7 @@ namespace SMM
                 m_gameHeader = std::make_unique<ProgramHeader>(base_address);
 
                 // Find ".?AVtype_info@@" from the .rdata section
-                char* str_type_info = FindStringInSection(".?AVtype_info@@", ".data");
+                const char* str_type_info = FindStringInSection(".?AVtype_info@@", ".data");
 
                 printf("[InstanceManager] Found: %s\n", str_type_info);
                 // TODO: Cross-reference for type_info's address to get type descriptor

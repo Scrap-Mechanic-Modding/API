@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common.hpp"
+#include "../../common.hpp"
 #include "Packet.hpp"
 
 #include <stdexcept>
@@ -26,7 +26,7 @@ namespace SMM
             unsigned char m_worldID{0};
             unsigned int m_flags{0};
             unsigned int m_mystery{0}; // unknown 4-byte sequence, possibly a checksum
-            char m_mystery2[3];        //unknown 3-byte sequence
+            char m_mystery2[3];        // unknown 3-byte sequence
             time_t m_timestamp{0};
             unsigned short m_playerNameSize{0};
             std::string m_playerName{""};
