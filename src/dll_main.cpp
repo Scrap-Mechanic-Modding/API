@@ -5,10 +5,10 @@
 
 void WINAPI Main()
 {
-    auto baseAddress = reinterpret_cast<uintptr_t>(GetModuleHandle(NULL));
+    // auto baseAddress = reinterpret_cast<uintptr_t>(GetModuleHandle(NULL));
     SMM::Utility::InstanceManager::GetInstance();
 
-    hookNetworkingFuncs(baseAddress);
+    // hookNetworkingFuncs(baseAddress);
 }
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, PVOID lpReserved)

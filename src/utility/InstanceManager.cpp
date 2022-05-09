@@ -1,7 +1,6 @@
 #include "InstanceManager.hpp"
 #include "Utils.hpp"
 
-
 using namespace SMM::Utility;
 
 // TODO: Maybe turn into a template function? would be cleaner to avoid casting every time after calling this
@@ -42,7 +41,6 @@ const char* InstanceManager::FindStringInSection(const std::string& t_needle, co
     return nullptr;
 }
 
-
 std::unordered_map<std::string, void*> InstanceManager::FindVFTables() const
 {
     std::unordered_map<std::string, void*> results;
@@ -64,21 +62,31 @@ std::unordered_map<std::string, void*> InstanceManager::FindVFTables() const
 
     for (auto pCurrent = pStart_rdata; pCurrent.ptr < pEnd_rdata.ptr; pCurrent.ptr++)
     {
-        const ptr_t<uintptr_t> current_data{*pCurrent.ptr};
-
-        if (!IsCanonical(current_data.ptr) || current_data.ptr < pStart_text.ptr || current_data.ptr > pEnd_text.ptr)
+        const ptr_t<RTTICompleteObjectLocator> rtti_ptr{*pCurrent.ptr};
+        if (!IsCanonical(rtti_ptr.ptr) || rtti_ptr.raw < pStart_rdata.raw || rtti_ptr.raw > pEnd_rdata.raw)
             continue;
 
-        const ptr_t<RTTICompleteObjectLocator> rtti_ptr{*(pCurrent.ptr - 1)};
-
-        if (!IsCanonical(rtti_ptr.ptr) || rtti_ptr.raw < pStart_rdata.raw || rtti_ptr.raw > pEnd_rdata.raw)
+        const ptr_t<uintptr_t> vftable_start{*(pCurrent.ptr + 1)};
+        if (!IsCanonical(vftable_start.ptr) || vftable_start.raw < pStart_text.raw || vftable_start.raw > pEnd_text.raw)
             continue;
 
         if (rtti_ptr.raw != rtti_ptr.ptr->objectBase + base_address.raw)
             continue;
 
+        // Save to results
         const ptr_t<RTTITypeDescriptor> type_descriptor{rtti_ptr.ptr->typeDescriptor + base_address.raw};
         results[type_descriptor.ptr->type_name] = pCurrent.ptr;
+
+        int num_vfuncs = 0;
+        do
+        {
+            const ptr_t<uintptr_t> vftable_func{*(pCurrent.ptr + 1)};
+            if (!IsCanonical(vftable_func.ptr) || vftable_func.raw < pStart_text.raw || vftable_func.raw > pEnd_text.raw)
+                break;
+
+            pCurrent.ptr++;
+            num_vfuncs++;
+        } while (true);
     }
 
     return results;
