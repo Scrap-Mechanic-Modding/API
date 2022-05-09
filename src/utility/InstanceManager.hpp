@@ -2,14 +2,34 @@
 
 #include "../common.hpp"
 #include "ProgramHeader.hpp"
+#include "Utils.hpp"
 
 #include <memory>
+#include <windows.h>
 #include <unordered_map>
 
 namespace SMM
 {
     namespace Utility
     {
+
+
+        struct RTTICompleteObjectLocator {
+            int signature;
+            int offset;
+            int cdOffset;
+            uint32_t typeDescriptor;
+            uint32_t classDescriptor;
+            uint32_t objectBase;
+        };
+
+        struct RTTITypeDescriptor {
+            void* type_info_vftable;
+            uint64_t spare;
+            char type_name[1];
+        };
+
+
         class InstanceManager
         {
         public:
@@ -29,23 +49,26 @@ namespace SMM
             }
 
         private:
-            std::unordered_map<std::string, void*> m_vtables;
+            std::unordered_map<std::string, void*> m_mapVftables;
+            std::unordered_map<std::string, void*> m_mapRTTILocators;
             std::unique_ptr<ProgramHeader> m_gameHeader;
 
-            char* FindStringInSection(const std::string& t_needle, const std::string& t_section);
+            const char* FindStringInSection(const std::string& t_needle, const std::string& t_section, const ptrdiff_t alignment = 4) const;
+            std::unordered_map<std::string, void*> FindVFTables() const;
 
             InstanceManager()
             {
-                // Setup ProgramHeader for current process (scrap mechanic)
-                auto base_address = reinterpret_cast<uintptr_t>(GetModuleHandle(NULL));
+                ptr_t<void> base_address;
+                base_address.ptr = GetModuleHandle(nullptr);
+
+                // Setup ProgramHeader for current process (scrap mechanic)                
                 m_gameHeader = std::make_unique<ProgramHeader>(base_address);
+                
+                m_mapVftables = FindVFTables();
+                printf("Found %llu VFTables\n", m_mapVftables.size());
+                printf("std::shared_ptr<LuaManager> = %p\n", m_mapVftables[".?AV?$_Ref_count_resource@PEAVLuaManager@@P6AXPEAV1@@Z@std@@"]);
 
-                // Find ".?AVtype_info@@" from the .rdata section
-                char* str_type_info = FindStringInSection(".?AVtype_info@@", ".data");
-
-                printf("[InstanceManager] Found: %s\n", str_type_info);
-                // TODO: Cross-reference for type_info's address to get type descriptor
-                // type descriptor -> complete locator -> vtable -> all rtti locators
+                // TODO: Generate additional metadata for each class (#funcs, hierarchy, size?)
             }
         };
     } // namespace Utility

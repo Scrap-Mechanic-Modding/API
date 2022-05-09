@@ -2,6 +2,8 @@
 
 #define WIN32_LEAN_AND_MEAN
 
+#include "Utils.hpp"
+
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -15,17 +17,15 @@ namespace SMM
         class ProgramHeader
         {
         private:
-            IMAGE_DOS_HEADER* m_dosHeader;
+            ptr_t<IMAGE_DOS_HEADER> m_dosHeader;
             // DOS Stub
-            IMAGE_NT_HEADERS64* m_ntHeaders;
-            IMAGE_SECTION_HEADER* m_sectionHeaders;
-
-            short m_numOfSections;
+            ptr_t<IMAGE_NT_HEADERS64> m_ntHeaders;
+            ptr_t<IMAGE_SECTION_HEADER> m_sectionHeaders;
 
             std::unordered_map<std::string, IMAGE_SECTION_HEADER*> m_sections;
 
         public:
-            ProgramHeader(uintptr_t t_baseAddress);
+            ProgramHeader(ptr_t<void> t_baseAddress);
 
             inline IMAGE_SECTION_HEADER* GetSectionByName(const std::string& t_name)
             {

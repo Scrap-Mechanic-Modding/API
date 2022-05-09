@@ -1,29 +1,28 @@
 #include "InstanceManager.hpp"
 
+
 using namespace SMM::Utility;
 
 // TODO: Maybe turn into a template function? would be cleaner to avoid casting every time after calling this
 // 4-Byte aligned search
-char* InstanceManager::FindStringInSection(const std::string& t_needle, const std::string& t_section)
+const char* InstanceManager::FindStringInSection(const std::string& t_needle, const std::string& t_section, const ptrdiff_t alignment) const
 {
-    auto base_address = reinterpret_cast<uintptr_t>(GetModuleHandle(NULL));
-    IMAGE_SECTION_HEADER* section = m_gameHeader->GetSectionByName(t_section);
-    printf("Section: %p\n", section);
+    const auto base_address = reinterpret_cast<char*>(GetModuleHandle(nullptr));
+    const IMAGE_SECTION_HEADER* section = m_gameHeader->GetSectionByName(t_section);
+
     if (!section)
     {
         return nullptr;
     }
 
-    auto pStart = reinterpret_cast<char*>(base_address + section->VirtualAddress);
-    auto pEnd = reinterpret_cast<char*>(base_address + section->VirtualAddress + section->Misc.VirtualSize);
+    const char* pStart = base_address + section->VirtualAddress;
+    const char* pEnd = base_address + section->VirtualAddress + section->Misc.VirtualSize;
 
-    printf("Searching range: %p -> %p\n", pStart, pEnd);
+    const size_t needle_size = t_needle.size();
 
-    auto needle_size = t_needle.size();
-
-    for (auto pCurrent = pStart; pCurrent < pEnd; pCurrent += 4)
+    for (auto pCurrent = pStart; pCurrent < pEnd; pCurrent += alignment)
     {
-        int matched = 0;
+        size_t matched = 0;
         while (matched < needle_size)
         {
             if (pCurrent[matched] != t_needle[matched])
@@ -40,4 +39,46 @@ char* InstanceManager::FindStringInSection(const std::string& t_needle, const st
     }
 
     return nullptr;
+}
+
+
+std::unordered_map<std::string, void*> InstanceManager::FindVFTables() const
+{
+    std::unordered_map<std::string, void*> results;
+
+    ptr_t<HINSTANCE__> base_address;
+    base_address.ptr = GetModuleHandle(nullptr);
+
+    const PIMAGE_SECTION_HEADER section_rdata = m_gameHeader->GetSectionByName(".rdata");
+    const PIMAGE_SECTION_HEADER section_text = m_gameHeader->GetSectionByName(".text");
+
+    if (!section_rdata)
+        return {};
+
+    const ptr_t<uintptr_t> pStart_rdata{base_address.raw + section_rdata->VirtualAddress};
+    const ptr_t<uintptr_t> pEnd_rdata{base_address.raw + section_rdata->VirtualAddress + section_rdata->SizeOfRawData};
+
+    const ptr_t<uintptr_t> pStart_text{base_address.raw + section_text->VirtualAddress};
+    const ptr_t<uintptr_t> pEnd_text{base_address.raw + section_text->VirtualAddress + section_text->SizeOfRawData};
+
+    for (auto pCurrent = pStart_rdata; pCurrent.ptr < pEnd_rdata.ptr; pCurrent.ptr++)
+    {
+        const ptr_t<uintptr_t> current_data{*pCurrent.ptr};
+
+        if (!IsCanonical(current_data.ptr) || current_data.ptr < pStart_text.ptr || current_data.ptr > pEnd_text.ptr)
+            continue;
+
+        const ptr_t<RTTICompleteObjectLocator> rtti_ptr{*(pCurrent.ptr - 1)};
+
+        if (!IsCanonical(rtti_ptr.ptr) || rtti_ptr.raw < pStart_rdata.raw || rtti_ptr.raw > pEnd_rdata.raw)
+            continue;
+
+        if (rtti_ptr.raw != rtti_ptr.ptr->objectBase + base_address.raw)
+            continue;
+
+        const ptr_t<RTTITypeDescriptor> type_descriptor{rtti_ptr.ptr->typeDescriptor + base_address.raw};
+        results[type_descriptor.ptr->type_name] = pCurrent.ptr;
+    }
+
+    return results;
 }

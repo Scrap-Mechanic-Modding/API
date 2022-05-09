@@ -2,16 +2,15 @@
 
 using namespace SMM::Utility;
 
-ProgramHeader::ProgramHeader(uintptr_t t_baseAddress)
+ProgramHeader::ProgramHeader(ptr_t<void> t_baseAddress)
 {
-    m_dosHeader = (IMAGE_DOS_HEADER*) t_baseAddress;
-    m_ntHeaders = (IMAGE_NT_HEADERS64*) (t_baseAddress + m_dosHeader->e_lfanew);
-    m_sectionHeaders = (IMAGE_SECTION_HEADER*) ((char*) &m_ntHeaders->OptionalHeader + m_ntHeaders->FileHeader.SizeOfOptionalHeader);
-    m_numOfSections = m_ntHeaders->FileHeader.NumberOfSections;
+    m_dosHeader.raw = t_baseAddress.raw;
+    m_ntHeaders.raw = t_baseAddress.raw + m_dosHeader.ptr->e_lfanew;
+    m_sectionHeaders.raw = ((uintptr_t) &m_ntHeaders.ptr->OptionalHeader + m_ntHeaders.ptr->FileHeader.SizeOfOptionalHeader);
 
-    for (int i = 0; i < m_numOfSections; i++)
+    for (int i = 0; i < m_ntHeaders.ptr->FileHeader.NumberOfSections; i++)
     {
-        std::string sectionName((char*) m_sectionHeaders[i].Name, 8);
-        m_sections[sectionName.c_str()] = &m_sectionHeaders[i];
+        std::string sectionName((char*) &m_sectionHeaders.ptr[i].Name, 8);
+        m_sections[sectionName.c_str()] = &m_sectionHeaders.ptr[i];
     }
 }
