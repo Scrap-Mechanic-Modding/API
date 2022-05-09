@@ -1,7 +1,6 @@
 #include "InstanceManager.hpp"
 #include "Utils.hpp"
 
-#include <Windows.h>
 
 using namespace SMM::Utility;
 
@@ -43,27 +42,6 @@ const char* InstanceManager::FindStringInSection(const std::string& t_needle, co
     return nullptr;
 }
 
-template<class T>
-union ptr_t {
-    uintptr_t uint;
-    T* ptr;
-    char* cptr;
-};
-
-struct _RTTICompleteObjectLocator {
-    int signature;
-    int offset;
-    int cdOffset;
-    uint32_t typeDescriptor;
-    uint32_t classDescriptor;
-    uint32_t objectBase;
-};
-
-struct _RTTITypeDescriptor {
-    void* type_info_vftable;
-    uint64_t spare;
-    char type_name[1];
-};
 
 std::unordered_map<std::string, void*> InstanceManager::FindVFTables() const
 {
@@ -78,11 +56,11 @@ std::unordered_map<std::string, void*> InstanceManager::FindVFTables() const
     if (!section_rdata)
         return {};
 
-    const ptr_t<uintptr_t> pStart_rdata{base_address.uint + section_rdata->VirtualAddress};
-    const ptr_t<uintptr_t> pEnd_rdata{base_address.uint + section_rdata->VirtualAddress + section_rdata->SizeOfRawData};
+    const ptr_t<uintptr_t> pStart_rdata{base_address.raw + section_rdata->VirtualAddress};
+    const ptr_t<uintptr_t> pEnd_rdata{base_address.raw + section_rdata->VirtualAddress + section_rdata->SizeOfRawData};
 
-    const ptr_t<uintptr_t> pStart_text{base_address.uint + section_text->VirtualAddress};
-    const ptr_t<uintptr_t> pEnd_text{base_address.uint + section_text->VirtualAddress + section_text->SizeOfRawData};
+    const ptr_t<uintptr_t> pStart_text{base_address.raw + section_text->VirtualAddress};
+    const ptr_t<uintptr_t> pEnd_text{base_address.raw + section_text->VirtualAddress + section_text->SizeOfRawData};
 
     for (auto pCurrent = pStart_rdata; pCurrent.ptr < pEnd_rdata.ptr; pCurrent.ptr++)
     {
@@ -91,15 +69,15 @@ std::unordered_map<std::string, void*> InstanceManager::FindVFTables() const
         if (!IsCanonical(current_data.ptr) || current_data.ptr < pStart_text.ptr || current_data.ptr > pEnd_text.ptr)
             continue;
 
-        const ptr_t<_RTTICompleteObjectLocator> rtti_ptr{*(pCurrent.ptr - 1)};
+        const ptr_t<RTTICompleteObjectLocator> rtti_ptr{*(pCurrent.ptr - 1)};
 
-        if (!IsCanonical(rtti_ptr.cptr) || rtti_ptr.uint < pStart_rdata.uint || rtti_ptr.uint > pEnd_rdata.uint)
+        if (!IsCanonical(rtti_ptr.ptr) || rtti_ptr.raw < pStart_rdata.raw || rtti_ptr.raw > pEnd_rdata.raw)
             continue;
 
-        if (rtti_ptr.uint != rtti_ptr.ptr->objectBase + base_address.uint)
+        if (rtti_ptr.raw != rtti_ptr.ptr->objectBase + base_address.raw)
             continue;
 
-        const ptr_t<_RTTITypeDescriptor> type_descriptor{rtti_ptr.ptr->typeDescriptor + base_address.uint};
+        const ptr_t<RTTITypeDescriptor> type_descriptor{rtti_ptr.ptr->typeDescriptor + base_address.raw};
         results[type_descriptor.ptr->type_name] = pCurrent.ptr;
     }
 
