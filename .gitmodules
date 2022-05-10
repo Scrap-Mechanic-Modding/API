@@ -1,4 +1,3 @@
-[submodule "Mapping"]
+[submodule "include/Mapping"]
 	path = include/Mapping
 	url = https://github.com/Scrap-Mechanic-Modding/Mapping.git
-	branch = prime_dev
