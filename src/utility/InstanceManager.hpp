@@ -52,7 +52,7 @@ namespace SMM
             std::unordered_map<std::string, void*> m_mapVftables;
             std::unordered_map<std::string, void*> m_mapRTTILocators;
             std::unique_ptr<ProgramHeader> m_gameHeader;
-
+  
             const char* FindStringInSection(const std::string& t_needle, const std::string& t_section, const ptrdiff_t alignment = 4) const;
             std::unordered_map<std::string, void*> FindVFTables() const;
 
