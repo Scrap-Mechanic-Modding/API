@@ -1,16 +1,6 @@
 add_library(API SHARED
 	common.hpp
-	utility/ByteStream.hpp
-	utility/ByteStream.cpp
-	utility/ProgramHeader.hpp
-	utility/ProgramHeader.cpp
-	utility/Utils.hpp
-	utility/Utils.cpp
-	utility/VMT.hpp
-	utility/ProgramHeader.hpp
-	utility/ProgramHeader.cpp
-	utility/InstanceManager.hpp
-	utility/InstanceManager.cpp
+	VMT.hpp
 	network/Packets/Packet.hpp
 	network/Packets/GenericPacket.hpp
 	network/Packets/GenericPacket.cpp
