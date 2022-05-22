@@ -6,7 +6,21 @@
 void WINAPI Main()
 {
     // auto baseAddress = reinterpret_cast<uintptr_t>(GetModuleHandle(NULL));
-    SMM::Utility::InstanceManager::GetInstance();
+    auto& instanceMgr = SMM::Utility::InstanceManager::GetInstance();
+    const std::string klass = ".?AVCharacter@@";
+    std::vector<void*> instances = instanceMgr.GetInstancesByName<void*>(klass);
+
+    printf("Found %llu instance(s) of class '%s'", instances.size(), klass.c_str());
+    if (!instances.empty())
+    {
+        printf(":");
+        for (const auto& ptr: instances)
+        {
+            printf("\n\t- %p", ptr);
+        }
+    }
+
+    printf("\n");
 
     // hookNetworkingFuncs(baseAddress);
 }

@@ -23,7 +23,7 @@ add_library(API SHARED
 	network/hook.hpp
 	network/hook.cpp
 	dll_main.cpp
-)
+ "utility/VtableDatabase.hpp")
 
 target_link_libraries(API steam_api64)
 target_link_libraries(API lz4)
